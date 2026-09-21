@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="google" content="notranslate" />
+  <meta name="description" content="Quran Ayah Studio — retrieve authentic Quran ayahs and create high-resolution Islamic posts." />
+  <meta name="theme-color" content="#0e1512" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.alquran.cloud https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; script-src 'self'; worker-src 'self' blob:; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" />
+  <title>Quran Ayah Studio</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Quran Ayah Studio">
+        <div class="brand-mark" aria-hidden="true">۞</div>
+        <div>
+          <div class="brand-title">Quran Ayah Studio</div>
+          <div class="brand-subtitle">Authentic text. Refined design.</div>
+        </div>
+      </div>
+      <nav class="main-nav" aria-label="Primary navigation">
+        <button class="nav-btn active" data-section="generate">Generate</button>
+        <button class="nav-btn" data-section="quran">Quran</button>
+        <button class="nav-btn" data-section="templates">Templates</button>
+        <button class="nav-btn" data-section="favorites">Favorites</button>
+        <button class="nav-btn" data-section="history">History</button>
+        <button class="nav-btn" data-section="settings">Settings</button>
+      </nav>
+    </header>
+
+    <main class="main-content">
+      <section id="section-generate" class="section-view active">
+        <div class="hero-card">
+          <div class="hero-copy">
+            <span class="eyebrow">Quran → design → export</span>
+            <h1>Create beautiful Quran Ayah posts in seconds.</h1>
+            <p>Enter a Surah:Ayah reference. The app retrieves the verse from a structured Quran edition, verifies it, then renders the post from immutable source data.</p>
+          </div>
+          <form id="reference-form" class="reference-form" autocomplete="off">
+            <label for="reference-input">Enter Surah:Ayah</label>
+            <div class="reference-row">
+              <input id="reference-input" name="reference" inputmode="search" placeholder="2:255" aria-describedby="reference-help" />
+              <button class="primary-btn" type="submit">Create Post</button>
+            </div>
+            <div id="reference-help" class="helper">Examples: 2:255 · 36:1 · Al-Baqarah 255 · 2 255</div>
+            <div class="quick-actions">
+              <button id="random-ayah-btn" type="button" class="secondary-btn">Random Ayah</button>
+              <button id="surprise-btn" type="button" class="ghost-btn">Surprise Me</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="workspace-grid">
+          <aside class="left-panel panel">
+            <div class="panel-header"><span>Ayah data</span><span id="verification-badge" class="badge muted">Not loaded</span></div>
+            <div id="ayah-state" class="empty-state">
+              <div class="empty-icon">⌁</div>
+              <strong>Enter a reference to begin.</strong>
+              <span>The retrieved Arabic is treated as immutable data.</span>
+            </div>
+            <div id="ayah-details" class="ayah-details hidden">
+              <div class="reference-chip" id="canonical-reference">—</div>
+              <div class="surah-meta"><strong id="surah-name">—</strong><span id="surah-name-ar">—</span></div>
+              <div class="meta-grid">
+                <div><span>Ayah</span><strong id="meta-ayah">—</strong></div>
+                <div><span>Juz</span><strong id="meta-juz">—</strong></div>
+                <div><span>Hizb</span><strong id="meta-hizb">—</strong></div>
+                <div><span>Page</span><strong id="meta-page">—</strong></div>
+              </div>
+              <div class="source-line"><span>Arabic source</span><strong id="arabic-source">—</strong></div>
+              <div class="source-line"><span>Translation</span><strong id="translation-source">—</strong></div>
+              <div class="hash-box"><span>Arabic SHA-256</span><code id="arabic-hash">—</code></div>
+              <div class="text-preview" dir="rtl" lang="ar" translate="no" id="arabic-preview"></div>
+              <div class="translation-preview" id="translation-preview"></div>
+              <div class="small-actions">
+                <button id="copy-ref" class="icon-btn" type="button">Copy Reference</button>
+                <button id="copy-arabic" class="icon-btn" type="button">Copy Arabic</button>
+                <button id="copy-translation" class="icon-btn" type="button">Copy Translation</button>
+                <button id="favorite-btn" class="icon-btn" type="button">Favorite</button>
+                <button id="share-image-btn" class="icon-btn" type="button">Share Image</button>
+              </div>
+            </div>
+          </aside>
+
+          <section class="preview-panel panel">
+            <div class="panel-header">
+              <span>Live preview</span>
+              <div class="preview-tools">
+                <button class="icon-btn" id="zoom-out" type="button" aria-label="Zoom out">−</button>
+                <span id="zoom-label">100%</span>
+                <button class="icon-btn" id="zoom-in" type="button" aria-label="Zoom in">+</button>
+                <button class="icon-btn" id="fullscreen-preview" type="button">Fullscreen</button>
+              </div>
+            </div>
+            <div class="canvas-stage" id="canvas-stage">
+              <div class="canvas-frame" id="canvas-frame">
+                <canvas id="post-canvas" width="1080" height="1080" aria-label="Generated Quran post preview"></canvas>
+                <div id="preview-loading" class="canvas-loading hidden"><div class="spinner"></div><span>Rendering…</span></div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="right-panel panel">
+            <div class="panel-header"><span>Design & Export</span><span id="fit-status" class="badge success">Ready</span></div>
+            <div class="tabs-row">
+              <button class="subtab active" data-tab="design">Design</button>
+              <button class="subtab" data-tab="export">Export</button>
+            </div>
+
+            <div id="tab-design" class="tab-content active">
+              <div class="control-group">
+                <label>Template</label>
+                <div id="template-grid" class="template-grid"></div>
+              </div>
+              <div class="control-group">
+                <label for="palette-select">Palette</label>
+                <select id="palette-select"></select>
+              </div>
+              <div class="control-group two-col">
+                <div><label for="arabic-size">Arabic size</label><input id="arabic-size" type="range" min="42" max="180" value="104" /></div>
+                <div><label for="translation-size">Translation size</label><input id="translation-size" type="range" min="22" max="72" value="36" /></div>
+              </div>
+              <div class="control-group two-col">
+                <div><label for="line-spacing">Line spacing</label><input id="line-spacing" type="range" min="1" max="2" step="0.05" value="1.28" /></div>
+                <div><label for="opacity">Overlay opacity</label><input id="opacity" type="range" min="0" max="0.85" step="0.05" value="0.22" /></div>
+              </div>
+              <div class="control-group">
+                <label>Alignment</label>
+                <div class="segmented" id="alignment-control">
+                  <button type="button" data-align="left">Left</button>
+                  <button type="button" data-align="center" class="selected">Center</button>
+                  <button type="button" data-align="right">Right</button>
+                </div>
+              </div>
+              <div class="control-group">
+                <label>Vertical position</label>
+                <div class="segmented" id="vertical-control">
+                  <button type="button" data-vertical="top">Top</button>
+                  <button type="button" data-vertical="middle" class="selected">Middle</button>
+                  <button type="button" data-vertical="bottom">Bottom</button>
+                </div>
+              </div>
+              <div class="control-group two-col">
+                <div><label for="margin">Margins</label><input id="margin" type="range" min="48" max="320" value="132" /></div>
+                <div><label for="border-width">Border</label><input id="border-width" type="range" min="0" max="12" value="2" /></div>
+              </div>
+              <div class="control-group">
+                <label for="translation-select">Translation edition</label>
+                <select id="translation-select"><option value="en.itani">Loading translation editions…</option></select>
+                <div id="translation-license-note" class="helper"></div>
+              </div>
+              <div class="toggle-row"><label><input id="watermark-toggle" type="checkbox" /> <span>Enable watermark</span></label></div>
+              <div class="toggle-row"><label><input id="safe-overlay-toggle" type="checkbox" checked /> <span>Automatic readability overlay</span></label></div>
+              <div class="advanced-fold"><button id="advanced-toggle" type="button" class="fold-btn">Advanced settings <span>⌄</span></button><div id="advanced-box" class="hidden">
+                <div class="control-group two-col"><div><label for="watermark-text">Watermark</label><input id="watermark-text" value="Quran Ayah Studio" /></div><div><label for="watermark-opacity">Watermark opacity</label><input id="watermark-opacity" type="range" min="0.05" max="0.6" step="0.05" value="0.18" /></div></div>
+                <div class="control-group"><label for="arabic-font">Arabic font</label><select id="arabic-font"><option value="Amiri Quran">Amiri Quran</option><option value="Amiri">Amiri</option></select><div class="helper">Only Quran-capable Arabic fonts are offered in this build.</div></div>
+              </div></div>
+              <div class="toolbar-row"><button id="undo-btn" type="button" class="icon-btn">Undo</button><button id="redo-btn" type="button" class="icon-btn">Redo</button><button id="reset-btn" type="button" class="icon-btn">Reset</button></div>
+            </div>
+
+            <div id="tab-export" class="tab-content">
+              <div class="export-card">
+                <div class="export-heading">EXPORT</div>
+                <div class="format-row" id="format-control">
+                  <button type="button" data-format="png" class="selected">PNG</button>
+                  <button type="button" data-format="jpeg">JPEG</button>
+                  <button type="button" data-format="webp">WebP</button>
+                </div>
+                <div class="control-group"><label for="preset-select">Social preset</label><select id="preset-select"><option value="square">Instagram Post · 1080 × 1080</option><option value="portrait">Instagram Portrait · 1080 × 1350</option><option value="story">Instagram Story · 1080 × 1920</option><option value="facebook">Facebook Post · 1200 × 1500</option><option value="whatsapp">WhatsApp Status · 1080 × 1920</option><option value="youtube">YouTube Community · 1920 × 1080</option><option value="pinterest">Pinterest · 1000 × 1500</option><option value="custom">Custom</option></select></div>
+                <div class="resolution-grid"><button type="button" data-resolution="1080x1080">1080 × 1080</button><button type="button" data-resolution="2048x2048">2048 × 2048</button><button type="button" data-resolution="4096x4096">4096 × 4096</button><button type="button" data-resolution="max">Maximum Safe</button></div>
+                <div id="custom-resolution" class="control-group two-col hidden"><div><label for="custom-width">Width</label><input id="custom-width" type="number" min="320" max="8192" value="1080" /></div><div><label for="custom-height">Height</label><input id="custom-height" type="number" min="320" max="8192" value="1080" /></div></div>
+                <div class="resolution-readout"><span>Selected</span><strong id="resolution-label">1080 × 1080</strong></div>
+                <div class="quality-block"><div><label for="quality-slider">Quality</label><span id="quality-label">100%</span></div><input id="quality-slider" type="range" min="70" max="100" value="100" /></div>
+                <div id="memory-warning" class="warning hidden"></div>
+                <div id="export-note" class="helper">PNG is lossless and recommended for maximum text quality.</div>
+                <button id="export-btn" type="button" class="export-btn">Export HD</button>
+                <div id="export-progress" class="progress-wrap hidden"><div class="progress-track"><div id="export-progress-bar" class="progress-bar"></div></div><span id="export-progress-label">Preparing HD export…</span></div>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <div class="bottom-grid">
+          <section class="panel search-panel">
+            <div class="panel-header"><span>Search Quran</span><span class="helper">Structured search · no AI rewriting</span></div>
+            <div class="search-row"><select id="search-edition"><option value="quran-uthmani">Arabic Uthmani</option><option value="en.itani">English — Talal Itani</option></select><input id="search-input" placeholder="Search a word or phrase" /><button id="search-btn" class="secondary-btn">Search</button></div>
+            <div id="search-results" class="search-results"></div>
+          </section>
+          <section class="panel explorer-panel">
+            <div class="panel-header"><span>Quran explorer</span><button id="cache-quran" type="button" class="ghost-btn">Cache Arabic offline</button></div>
+            <div id="surah-list" class="surah-list"></div>
+            <div id="cache-progress" class="helper hidden"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="section-quran" class="section-view"><div class="standalone-grid"><div class="panel"><div class="panel-header"><span>Quran browser</span><span id="browser-summary" class="helper">114 Surahs · 6,236 ayahs</span></div><div id="quran-browser" class="quran-browser"></div></div></div></section>
+      <section id="section-templates" class="section-view"><div class="panel"><div class="panel-header"><span>Template library</span><span class="helper">20 deterministic layouts</span></div><div id="template-library" class="template-library"></div></div></section>
+      <section id="section-favorites" class="section-view"><div class="panel"><div class="panel-header"><span>Favorites</span><span class="helper">Saved locally on this device</span></div><div id="favorites-list" class="saved-list"></div></div></section>
+      <section id="section-history" class="section-view"><div class="panel"><div class="panel-header"><span>History</span><button id="clear-history" type="button" class="ghost-btn">Clear history</button></div><div id="history-list" class="saved-list"></div></div></section>
+      <section id="section-settings" class="section-view"><div class="settings-grid"><section class="panel"><div class="panel-header"><span>Integrity & provenance</span></div><div class="settings-copy"><p><strong>Arabic source:</strong> Al Quran Cloud structured edition <code>quran-uthmani</code>. The renderer receives the text as data and never edits its characters.</p><p><strong>Translation source:</strong> selected API edition is shown with its edition/translator name. Review the source license before commercial deployment.</p><p><strong>AI policy:</strong> no AI model is used to generate or repair Quran Arabic.</p><p><strong>Attribution:</strong> Quran data is retrieved through Al Quran Cloud. The Quran text edition is presented verbatim.</p></div></section><section class="panel"><div class="panel-header"><span>App storage</span></div><div class="storage-actions"><button id="export-settings" class="secondary-btn">Export local settings</button><button id="clear-local" class="ghost-btn">Clear local data</button></div><div id="storage-status" class="helper"></div></section></div></section>
+    </main>
+
+    <footer class="footer">
+      <span>Quran Ayah Studio</span><span>Quran data via Al Quran Cloud · No AI-generated Quran text</span><a href="https://alquran.cloud/" target="_blank" rel="noreferrer">Source</a>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="fullscreen-modal" class="fullscreen-modal hidden"><button id="close-fullscreen" class="close-fullscreen">Close</button><div class="fullscreen-canvas-wrap"><canvas id="fullscreen-canvas"></canvas></div></div>
+  <script src="app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "Quran Ayah Studio",
+  "short_name": "Quran Ayah Studio",
+  "start_url": "./?app=1",
+  "display": "standalone",
+  "background_color": "#07100c",
+  "theme_color": "#0e1512",
+  "description": "Authentic Quran ayah retrieval and premium high-resolution post creation."
+}
